@@ -1,16 +1,19 @@
 import { auth } from "../lib/firebase";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { useRouter } from "next/router";
 import UploadForm from "../components/UploadForm";
 import GlaucusResponse from "../components/GlaucusResponse";
 import Head from "next/head";
+import html2canvas from "html2canvas";
+import { jsPDF } from "jspdf";
 
 export default function Home() {
   const [user, setUser] = useState(null);
   const [result, setResult] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const resultRef = useRef(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -31,6 +34,38 @@ export default function Home() {
       router.push("/login");
     } catch (error) {
       console.error("Logout error:", error);
+    }
+  };
+
+  const downloadPNG = async () => {
+    if (!resultRef.current) return;
+    
+    try {
+      const canvas = await html2canvas(resultRef.current);
+      const link = document.createElement('a');
+      link.download = 'glaucus-analysis.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch (error) {
+      console.error("Error generating PNG:", error);
+    }
+  };
+
+  const downloadPDF = async () => {
+    if (!resultRef.current) return;
+    
+    try {
+      const canvas = await html2canvas(resultRef.current);
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save('glaucus-analysis.pdf');
+    } catch (error) {
+      console.error("Error generating PDF:", error);
     }
   };
 
@@ -103,10 +138,30 @@ export default function Home() {
               </div>
             ) : result ? (
               <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
-                <div className="bg-blue-600 px-6 py-3">
+                <div className="bg-blue-600 px-6 py-3 flex justify-between items-center">
                   <h3 className="text-lg font-semibold text-white">Identification Results</h3>
+                  <div className="flex space-x-2">
+                    <button 
+                      onClick={downloadPNG}
+                      className="flex items-center space-x-1 bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded text-sm transition-colors"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <span>PNG</span>
+                    </button>
+                    <button 
+                      onClick={downloadPDF}
+                      className="flex items-center space-x-1 bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded text-sm transition-colors"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                      </svg>
+                      <span>PDF</span>
+                    </button>
+                  </div>
                 </div>
-                <div className="p-6">
+                <div className="p-6" ref={resultRef}>
                   <GlaucusResponse message={result} />
                 </div>
               </div>
