@@ -12,16 +12,20 @@ export default function Register() {
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
 
-      await sendEmailVerification(user);
-
-      setStatus("sent");
+        await sendEmailVerification(user);
+        setStatus("sent");
     } catch (err) {
-      alert(err.message);
+        if (err.code === "auth/email-already-in-use") {
+        alert("⚠️ This email is already registered. Please log in instead.");
+        } else {
+        alert(err.message);
+        }
     }
-  };
+    };
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-green-100">

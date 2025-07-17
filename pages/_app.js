@@ -3,7 +3,7 @@ import "../styles/globals.css";
 import dynamic from "next/dynamic";
 
 const Layout = dynamic(() => import("../components/Layout"), {
-  ssr: false, // ✅ disable SSR for Layout
+  ssr: false, 
 });
 
 export default function App({ Component, pageProps }) {
