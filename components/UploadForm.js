@@ -33,7 +33,7 @@ export default function UploadForm({ onResult }) {
       // Save data to Firestore
       await addDoc(collection(db, "detections"), {
         imageName: image.name,
-        imageData: base64, // ⬅️ Store image directly
+        imageData: base64, 
         result,
         userEmail: auth.currentUser?.email || "anonymous",
         timestamp: Timestamp.now(),
