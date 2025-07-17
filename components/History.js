@@ -1,109 +1,233 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/router";
-import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "../lib/firebase";
-import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
+import { collection, getDocs, query, orderBy, doc, deleteDoc } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
+import { jsPDF } from "jspdf";
+import { toast } from "react-hot-toast";
+import { FiTrash2, FiDownload, FiSearch } from "react-icons/fi";
 
-export default function History() {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+export default function HistoryPage() {
   const [userEmail, setUserEmail] = useState(null);
   const [detections, setDetections] = useState([]);
+  const [filtered, setFiltered] = useState([]);
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const contentRef = useRef(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      try {
-        if (user) {
-          setUserEmail(user.email);
-          await fetchDetections(user.email);
-        } else {
-          router.replace("/login");
-        }
-      } catch (err) {
-        setError("Failed to load history");
-        console.error(err);
-      } finally {
+      if (user) {
+        setUserEmail(user.email);
+        await fetchUserDetections(user.email);
         setLoading(false);
+      } else {
+        router.replace("/login");
       }
     });
-
     return () => unsubscribe();
-  }, []); // Removed router dependency
+  }, []);
 
-  const fetchDetections = async (email) => {
+  const fetchUserDetections = async (email) => {
     try {
-      const q = query(
-        collection(db, "detections"),
-        where("userEmail", "==", email),
-        orderBy("timestamp", "desc")
-      );
+      const q = query(collection(db, "detections"), orderBy("timestamp", "desc"));
       const snapshot = await getDocs(q);
-      const userDetections = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      setDetections(userDetections);
-    } catch (err) {
-      throw err; // Caught in parent try/catch
+      const docs = snapshot.docs
+        .map((doc) => ({ id: doc.id, ...doc.data() }))
+        .filter((doc) => doc.userEmail === email);
+      setDetections(docs);
+      setFiltered(docs);
+    } catch (error) {
+      toast.error("Failed to fetch detections");
+      console.error(error);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
+  useEffect(() => {
+    const lower = search.toLowerCase();
+    const results = detections.filter(
+      (d) =>
+        d.imageName?.toLowerCase().includes(lower) ||
+        d.result?.toLowerCase().includes(lower)
     );
-  }
+    setFiltered(results);
+  }, [search, detections]);
 
-  if (error) {
-    return (
-      <div className="p-4 bg-red-50 text-red-600 rounded">
-        ⚠️ {error} - <button onClick={() => window.location.reload()} className="underline">Try again</button>
-      </div>
+  const deleteDetection = async (id) => {
+    if (window.confirm("Are you sure you want to delete this record?")) {
+      try {
+        await deleteDoc(doc(db, "detections", id));
+        setDetections(detections.filter((d) => d.id !== id));
+        toast.success("Record deleted successfully");
+      } catch (error) {
+        toast.error("Failed to delete record");
+        console.error(error);
+      }
+    }
+  };
+
+  const exportToPDF = (detection) => {
+    const doc = new jsPDF();
+    const margin = 20;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const usableWidth = pageWidth - margin * 2;
+    let y = margin;
+
+    // Title
+    doc.setFontSize(18);
+    doc.setTextColor(0, 102, 204); // Blue
+    doc.text("🐟 Glaucus - Fish Detection Report", margin, y);
+
+    y += 10;
+
+    // Divider
+    doc.setDrawColor(180);
+    doc.line(margin, y, pageWidth - margin, y);
+    y += 10;
+
+    // Image
+    if (detection.imageData) {
+        try {
+        const imgData = `data:image/jpeg;base64,${detection.imageData}`;
+        doc.addImage(imgData, "JPEG", margin, y, 80, 60);
+        } catch (error) {
+        console.error("Error adding image to PDF:", error);
+        }
+    }
+
+    // Info section (to the right of image)
+    const infoX = margin + 90;
+    const infoY = y + 5;
+    const lineHeight = 8;
+
+    doc.setFontSize(12);
+    doc.setFont(undefined, "bold");
+    doc.text("Image Name:", infoX, infoY);
+    doc.setFont(undefined, "normal");
+    doc.text(detection.imageName || "N/A", infoX, infoY + lineHeight);
+
+    doc.setFont(undefined, "bold");
+    doc.text("Date:", infoX, infoY + lineHeight * 2);
+    doc.setFont(undefined, "normal");
+    doc.text(
+        detection.timestamp?.toDate().toLocaleString() || "N/A",
+        infoX,
+        infoY + lineHeight * 3
     );
-  }
+
+    y += 70;
+
+    // Detection Result
+    doc.setFontSize(13);
+    doc.setFont(undefined, "bold");
+    doc.setTextColor(33, 33, 33);
+    doc.text("🧠 AI Detection Result:", margin, y);
+
+    y += 8;
+
+    doc.setFontSize(11);
+    doc.setFont(undefined, "normal");
+    doc.setTextColor(0);
+    const resultText = detection.result || "N/A";
+    const wrappedText = doc.splitTextToSize(resultText, usableWidth); // ✅ wrap to fit page
+    doc.text(wrappedText, margin, y);
+
+    y += wrappedText.length * 6 + 10;
+
+    // Footer
+    doc.setFontSize(10);
+    doc.setTextColor(120);
+    doc.text(
+        "Generated by Glaucus – your lovable marine AI assistant 🐠",
+        margin,
+        doc.internal.pageSize.getHeight() - 10
+    );
+
+    // Save the PDF
+    doc.save(`Glaucus_Report_${detection.id}.pdf`);
+    };
+
+
+  if (loading) return (
+    <div className="flex justify-center items-center h-64">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+    </div>
+  );
 
   return (
-    <div className="max-w-4xl mx-auto p-4">
-      <h1 className="text-2xl md:text-3xl font-bold mb-6 flex items-center">
-        <span className="mr-2">📜</span> Detection History
-      </h1>
-      
-      {detections.length === 0 ? (
-        <div className="text-center py-12 bg-gray-50 rounded-lg">
-          <p className="text-gray-500 text-lg">No detections found</p>
-          <button 
-            onClick={() => router.push("/")}
-            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          >
-            Upload your first image
-          </button>
+    <div className="p-4 md:p-8" ref={contentRef}>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+        <h1 className="text-2xl font-bold text-blue-700 mb-4 md:mb-0">Detection History</h1>
+        
+        <div className="relative w-full md:w-64">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <FiSearch className="text-gray-400" />
+          </div>
+          <input
+            type="text"
+            placeholder="Search by fish name or result..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
+      </div>
+
+      {filtered.length === 0 ? (
+        <div className="bg-gray-50 rounded-lg p-8 text-center">
+          <p className="text-gray-500">{search ? "No matching records found" : "No detection history available"}</p>
         </div>
       ) : (
-        <ul className="space-y-4">
-          {detections.map((det) => (
-            <li key={det.id} className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <p className="font-semibold">🖼️ Image</p>
-                  <p className="truncate">{det.imageName || "Untitled"}</p>
-                </div>
-                <div>
-                  <p className="font-semibold">💬 Result</p>
-                  <p>{det.result || "No result"}</p>
-                </div>
-                <div>
-                  <p className="font-semibold">📅 Date</p>
-                  <p className="text-sm text-gray-500">
-                    {det.timestamp?.toDate()?.toLocaleString() || "Unknown date"}
-                  </p>
+        <div className="space-y-4">
+          {filtered.map((det) => (
+            <div
+              key={det.id}
+              className="bg-white shadow rounded-lg p-4 hover:shadow-md transition-shadow"
+            >
+              <div className="flex flex-col md:flex-row gap-4">
+                {det.imageData && (
+                  <div className="flex-shrink-0">
+                    <img
+                      src={`data:image/jpeg;base64,${det.imageData}`}
+                      alt={det.imageName}
+                      className="w-full md:w-48 h-48 object-cover rounded-lg border"
+                    />
+                  </div>
+                )}
+                
+                <div className="flex-1">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-800">{det.imageName}</h3>
+                      <p className="text-gray-600 mt-1">{det.result}</p>
+                      <p className="text-sm text-gray-500 mt-2">
+                        {det.timestamp?.toDate().toLocaleString()}
+                      </p>
+                    </div>
+                    
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => exportToPDF(det)}
+                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
+                        title="Export to PDF"
+                      >
+                        <FiDownload size={18} />
+                      </button>
+                      <button
+                        onClick={() => deleteDetection(det.id)}
+                        className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
+                        title="Delete record"
+                      >
+                        <FiTrash2 size={18} />
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );
