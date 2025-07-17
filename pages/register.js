@@ -9,7 +9,7 @@ export default function Register() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [status, setStatus] = useState("register"); // 'register', 'sent'
+  const [status, setStatus] = useState("register"); 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
