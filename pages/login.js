@@ -106,7 +106,7 @@ export default function Login() {
                   id="password"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
                   type="password"
-                  placeholder="••••••••"
+                  placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -131,7 +131,7 @@ export default function Login() {
             </form>
 
             <div className="mt-6 text-center text-sm text-gray-500">
-              Don't have an account?{" "}
+              Don&apos;t have an account?{" "}
               <Link 
                 href="/register" 
                 className="font-medium text-blue-600 hover:text-blue-500 hover:underline transition-colors"
