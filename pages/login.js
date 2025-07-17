@@ -2,6 +2,7 @@ import { auth, provider } from "../lib/firebase";
 import { signInWithPopup, signInWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react";
 import { useRouter } from "next/router";
+import Link from "next/link";
 
 export default function Login() {
   const router = useRouter();
@@ -31,29 +32,45 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-blue-100">
       <div className="bg-white p-8 rounded shadow w-full max-w-md text-center">
         <h1 className="text-2xl font-bold mb-4">Login to Glaucus 🐠</h1>
-        
-        <button onClick={handleGoogleLogin} className="bg-red-500 text-white px-4 py-2 rounded mb-4 w-full">
+
+        <button
+          onClick={handleGoogleLogin}
+          className="bg-red-500 text-white px-4 py-2 rounded mb-4 w-full"
+        >
           Sign in with Google
         </button>
 
         <hr className="my-4" />
+
         <form onSubmit={handleEmailLogin} className="space-y-3">
           <input
             className="w-full p-2 border rounded"
             type="email"
             placeholder="Email"
             onChange={(e) => setEmail(e.target.value)}
+            required
           />
           <input
             className="w-full p-2 border rounded"
             type="password"
             placeholder="Password"
             onChange={(e) => setPassword(e.target.value)}
+            required
           />
-          <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded w-full">
+          <button
+            type="submit"
+            className="bg-blue-600 text-white px-4 py-2 rounded w-full"
+          >
             Sign in with Email
           </button>
         </form>
+
+        <p className="mt-4 text-sm text-gray-600">
+          Don’t have an account?{" "}
+          <Link href="/register" className="text-blue-600 hover:underline">
+            Register here
+          </Link>
+        </p>
       </div>
     </div>
   );
