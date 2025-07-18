@@ -5,7 +5,7 @@ import { analyzeFishImage } from "../lib/geminiVision";
 import { db, auth } from "../lib/firebase";
 import { collection, addDoc, Timestamp } from "firebase/firestore";
 
-export default function UploadForm({ onResult }) {
+export default function UploadForm({ onResult, onLoadingChange }) {
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -20,30 +20,33 @@ export default function UploadForm({ onResult }) {
 
   const handleAnalyze = async () => {
     if (!image) return;
-
     setLoading(true);
+    onLoadingChange(true); // notify parent
+
     try {
-      // Convert image to Base64
       const base64 = await toBase64(image);
 
-      // Analyze using Gemini
       const result = await analyzeFishImage(base64);
-      onResult(result);
 
-      // Save data to Firestore
+      // Pass all 3 required values to the parent
+      onResult(result, preview, base64);
+
+      // Save to Firestore (optional)
       await addDoc(collection(db, "detections"), {
         imageName: image.name,
-        imageData: base64, 
+        imageData: base64,
         result,
         userEmail: auth.currentUser?.email || "anonymous",
         timestamp: Timestamp.now(),
       });
 
-      console.log("✅ Stored in Firestore (no storage used)");
+      console.log("✅ Stored in Firestore");
     } catch (error) {
-      console.error("❌ Failed to store in Firestore:", error);
+      console.error("❌ Failed to analyze or store:", error);
+    } finally {
+      setLoading(false);
+      onLoadingChange(false); // notify parent
     }
-    setLoading(false);
   };
 
   return (
@@ -56,7 +59,13 @@ export default function UploadForm({ onResult }) {
         <p>📷 Drag & drop or click to upload a fish image</p>
       </div>
 
-      {preview && <img src={preview} alt="Preview" className="w-64 rounded shadow" />}
+      {preview && (
+        <img
+          src={preview}
+          alt="Preview"
+          className="w-64 h-auto rounded shadow"
+        />
+      )}
 
       <button
         onClick={handleAnalyze}
