@@ -135,7 +135,7 @@ export default function Register() {
                 </div>
                 <h2 className="text-lg font-medium text-gray-900 mb-2">Verification Email Sent!</h2>
                 <p className="text-gray-600 mb-6">
-                  We've sent a verification link to <span className="font-semibold text-gray-800">{email}</span>. 
+                  We&apos;ve sent a verification link to <span className="font-semibold text-gray-800">{email}</span>. 
                   Please check your inbox and click the link to verify your account.
                 </p>
                 <button
@@ -145,7 +145,7 @@ export default function Register() {
                   Continue to Login
                 </button>
                 <p className="mt-4 text-sm text-gray-500">
-                  Didn't receive the email?{" "}
+                  Didn&apos;t receive the email?{" "}
                   <button 
                     onClick={handleRegister}
                     className="text-blue-600 hover:underline font-medium"
