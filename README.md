@@ -55,9 +55,9 @@ Glaucus AI is an AI-powered web application that identifies fish species from im
 
 ### 🙌 Contributing
 # Fork the repo and clone
-git checkout -b feature/amazing-feature
-git commit -m "Add amazing feature"
-git push origin feature/amazing-feature
+- git checkout -b feature/amazing-feature
+- git commit -m "Add amazing feature"
+- git push origin feature/amazing-feature
 
 ### Setup Environment Variables
 NEXT_PUBLIC_FIREBASE_API_KEY=your-api-key
