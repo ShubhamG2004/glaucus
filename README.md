@@ -38,6 +38,7 @@ Glaucus AI is an AI-powered web application that identifies fish species from im
 | Authentication | Firebase Auth                              |
 | AI Model       | Google Gemini Vision API                   |
 | Image Handling | html2canvas, jsPDF                         |
+| **Agent**      | Loveble                                    |
 | Deployment     | Vercel                                     |
 
 ---
