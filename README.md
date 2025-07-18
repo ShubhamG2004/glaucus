@@ -17,7 +17,7 @@ Glaucus AI is an AI-powered web application that identifies fish species from im
 
 ## 🔗 Live Demo
 
-🔗 [https://glaucus-ai.vercel.app](https://glaucus-p6gq-obwmt0byx-shubhamg2004s-projects.vercel.app)  
+🔗 [glaucus-p6gq.vercel.app](glaucus-p6gq.vercel.app)  
 
 <img width="1358" height="1105" alt="Main_page" src="https://github.com/user-attachments/assets/f339a956-a54b-45e6-b129-45833fb2fb6a" />
 <img width="1358" height="1738" alt="History" src="https://github.com/user-attachments/assets/36e6eec0-d757-4b37-b404-c25d2d8b1719" />
