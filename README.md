@@ -1,40 +1,83 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
+# 🐟 Glaucus AI – Fish Detection and Insight Platform
 
-## Getting Started
+Glaucus AI is an AI-powered web application that identifies fish species from images and allows users to ask intelligent questions about the fish (like habitat, care, characteristics). It uses Firebase for authentication, Google Gemini Vision for AI, and Next.js for a modern, responsive frontend. Results can be exported as PNG or PDF for easy sharing.
 
-First, run the development server:
+---
+
+## 🌟 Features
+
+- 📷 Upload a fish image and receive instant species identification.
+- 💬 Ask follow-up questions like: “What does this fish eat?”
+- 🧠 Powered by Gemini Vision API for smart analysis.
+- 📄 Export insights as PNG or PDF.
+- 🔐 Firebase Authentication and secure routes.
+- 🎨 Sleek, modern UI using Tailwind CSS.
+
+---
+
+## 🔗 Live Demo
+
+🔗 [https://glaucus-ai.vercel.app](https://glaucus-p6gq-obwmt0byx-shubhamg2004s-projects.vercel.app)  
+
+<img width="1358" height="1105" alt="Main_page" src="https://github.com/user-attachments/assets/f339a956-a54b-45e6-b129-45833fb2fb6a" />
+<img width="1358" height="1738" alt="History" src="https://github.com/user-attachments/assets/36e6eec0-d757-4b37-b404-c25d2d8b1719" />
+
+---
+
+## 📸  Project Structure
+
+<img width="659" height="383" alt="ProjectStructure" src="https://github.com/user-attachments/assets/7eb532da-aba7-445f-9e97-975d2ffb554d" />
+
+---
+
+## 🧠 Tech Stack
+
+| Category        | Tech Used                                 |
+|----------------|--------------------------------------------|
+| Frontend       | Next.js, React, Tailwind CSS               |
+| Authentication | Firebase Auth                              |
+| AI Model       | Google Gemini Vision API                   |
+| Image Handling | html2canvas, jsPDF                         |
+| Deployment     | Vercel                                     |
+
+---
+
+
+---
+## 🚀 Getting Started
+
+### ✅ Prerequisites
+
+- Node.js v16+
+- Firebase project with Authentication enabled
+- Gemini API Key from [Google AI Studio](https://makersuite.google.com/)
+- A `.env.local` file with required keys
+
+### 🙌 Contributing
+# Fork the repo and clone
+git checkout -b feature/amazing-feature
+git commit -m "Add amazing feature"
+git push origin feature/amazing-feature
+
+### Setup Environment Variables
+NEXT_PUBLIC_FIREBASE_API_KEY=your-api-key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-auth-domain
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-storage-bucket
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your-msg-id
+NEXT_PUBLIC_FIREBASE_APP_ID=your-app-id
+NEXT_PUBLIC_GEMINI_API_KEY=your-gemini-api-key
+
+
+----
+## 👤 Contributors
+
+- [@shubhamgavade04](https://github.com/shubhamgavade04) - Creator & Maintainer 
+- [@Abhikhomane45](https://github.com/Abhikhomane45) - Contributor (README, UI improvements)
+-----
+
+### 1️⃣ Clone the Repo
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
-
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
-
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
-
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn-pages-router) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
+git clone https://github.com/your-username/glaucus-ai.git
+cd glaucus-ai
